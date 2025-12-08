@@ -1,11 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 
 namespace Kreta1._0
 {
     internal class Menu
     {
+        public static void LoadingScreen()
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            string ascii =
+@" ____  __.               __           
+|    |/ _|______   _____/  |______    
+|      < \_  __ \_/ __ \   __\__  \   
+|    |  \ |  | \/\  ___/|  |  / __ \_ 
+|____|__ \|__|    \___  >__| (____  / 
+        \/            \/          \/  ";
+
+            string[] lines = ascii.Split('\n');
+
+            
+            int consoleWidth = Console.WindowWidth;
+            int consoleHeight = Console.WindowHeight;
+
+            
+            int topPadding = (consoleHeight / 2) - (lines.Length / 2);
+
+            
+            for (int i = 0; i < topPadding; i++)
+            {
+                Console.WriteLine();
+            }
+
+            
+            foreach (string line in lines)
+            {
+                int leftPadding = (consoleWidth / 2) - (line.Length / 2);
+                Console.WriteLine(new string(' ', Math.Max(0, leftPadding)) + line);
+            }
+            Thread.Sleep(2000);
+        }
+
         public static void menu(User current, List<string> menutext, List<Action> parancs, int hossz)
         {
             int index = 0;
@@ -14,7 +52,7 @@ namespace Kreta1._0
 
             void menukiiras()
             {
-                Console.WriteLine($"{Console.SetCursorPosition(10, 1)}Üdv {current.Name}!");
+                Console.WriteLine($"\tÜdv {current.Name}!");
                 for (int i = 0; i < menuT.Count; i++)
                 {
                     if (index == i)

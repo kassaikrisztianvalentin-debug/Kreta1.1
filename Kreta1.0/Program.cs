@@ -4,13 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Kreta1._0
 {
     internal class Program
     {
+        
+
         static void Main(string[] args)
         {
+
+            Menu.LoadingScreen();
             Authorization.fileRead("diakok.txt");
             Authorization.fileRead("tanarok.txt");
             Authorization.fileRead("adminok.txt");

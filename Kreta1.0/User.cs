@@ -234,9 +234,22 @@ namespace Kreta1._0
         {
             Console.Write("Kérem a jegyet (1-5): ");
             int jegy = int.Parse(Console.ReadLine());
-            //tanulo.jegyek.Add(new Jegy(this.tantargy ,jegy, DateTime.Now, this.Name, tanulo.Name));
-            Tanulo.jegyek.Add(new Jegy(this.tantargy, jegy, DateTime.Now, this.Name, tanulo.Name));
-            Console.WriteLine("Sikeres jegybeírás!");
+            while (true)
+            {
+                if (jegy >= 1 && jegy <= 5)
+                {
+                    Tanulo.jegyek.Add(new Jegy(this.tantargy, jegy, DateTime.Now, this.Name, tanulo.Name));
+                    Console.WriteLine("Sikeres jegybeírás!");
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Sikertelen jegybeiras\n");
+                    Console.Write("Kérem a jegyet (1-5): ");
+                    jegy = int.Parse(Console.ReadLine());
+                }
+            }
+            
             Thread.Sleep(1000);
             tanuloFunkciok(tanulo);
         }
@@ -251,8 +264,23 @@ namespace Kreta1._0
         {
             Console.Write("Kérem az új jegyet (1-5): ");
             int ujJegy = int.Parse(Console.ReadLine());
-            jegy.Ertek = ujJegy;
-            Console.WriteLine("Sikeres jegymódosítás!");
+            while (true)
+            {
+                if(ujJegy >= 1 && ujJegy <= 5)
+                {
+                    jegy.Ertek = ujJegy;
+                    Console.WriteLine("Sikeres jegymódosítás!");
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Sikertelen jegymódosítás!\n");
+                    Console.Write("Kérem a jegyet (1-5): ");
+                    ujJegy = int.Parse(Console.ReadLine());
+                }
+            }
+
+            
             Thread.Sleep(1000);
             osztalyok();
         }

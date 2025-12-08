@@ -59,27 +59,40 @@ namespace Kreta1._0
                 }
             }
         }
+        
 
         public static User LogIn()
         {
             Console.Clear();
-
-            Console.Write("Felhasználónév: ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("\tFelhasználónév: ");
+            Console.ForegroundColor = ConsoleColor.Red;
             string fnev = Console.ReadLine();
-            Console.Write("Jelszó: ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("\tJelszó: ");
+
+            Console.ForegroundColor = ConsoleColor.Red;
             string jelszo = Console.ReadLine();
+            Console.ForegroundColor = ConsoleColor.White;
 
             foreach (var item in userList)
             {
                 if (item.Username == fnev && item.Password == jelszo)
                 {
-                    Console.WriteLine("Sikeres bejelentkezés!");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("\tSikeres bejelentkezés!");
+
+                    Thread.Sleep(1000);
+                    Console.ForegroundColor = ConsoleColor.White;
                     return item;
+
                 }
             }
-
-            Console.WriteLine("Sikertelen bejelentkezés!");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\tSikertelen bejelentkezés!");
             Thread.Sleep(1000);
+            Console.ForegroundColor = ConsoleColor.White;
+
             return null;
         }
     }
