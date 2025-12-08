@@ -14,18 +14,18 @@ namespace Kreta1._0
 
             void menukiiras()
             {
-                Console.WriteLine($"Üdv {current.Name}");
+                Console.WriteLine($"{Console.SetCursorPosition(10, 1)}Üdv {current.Name}!");
                 for (int i = 0; i < menuT.Count; i++)
                 {
                     if (index == i)
                     {
                         Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.WriteLine("[X]" + menuT[i]);
+                        Console.WriteLine("\t[X]" + menuT[i]);
                     }
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.White;
-                        Console.WriteLine("[ ]" + menuT[i]);
+                        Console.WriteLine("\t[ ]" + menuT[i]);
                     }
 
                 }
