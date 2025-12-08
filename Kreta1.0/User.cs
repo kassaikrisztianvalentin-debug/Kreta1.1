@@ -384,8 +384,21 @@ namespace Kreta1._0
             //}
             Menu.TimetableMenu(osztaly);
         }
+        void TimetableOra(Timetable ora)
+        {
+            List<string> orakiiras = new List<string>() { $"{ora.Subject}, {ora.Teacher}:{ora.Terem,-20}", "Mulasztás", "Vissza" };
+            List<Action> oraparancs = new List<Action>() { () => TimetableOra(ora), () => MulasztasBeiras(ora), () => osztalyok()};
+            Menu.menu(this, orakiiras, oraparancs, orakiiras.Count);
+        }
+
+        void MulasztasBeiras(Timetable ora)
+        {
+            
+
+        }
         public override string ToString()
         {
+            Console.Clear();
             return $"Név: {Name}\nFelhasználónév: {Username}\nJelszó: {Password}Tantárgy: {tantargy}";
         }
     }

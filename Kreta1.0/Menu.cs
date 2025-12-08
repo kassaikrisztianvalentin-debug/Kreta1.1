@@ -14,7 +14,7 @@ namespace Kreta1._0
 
             void menukiiras()
             {
-                Console.WriteLine($"{Console.SetCursorPosition(10, 1)}Üdv {current.Name}!");
+                Console.WriteLine($"\tÜdv {current.Name}!\n");
                 for (int i = 0; i < menuT.Count; i++)
                 {
                     if (index == i)
@@ -68,14 +68,15 @@ namespace Kreta1._0
                 }
             }
         }
-
         public static void TimetableMenu(string osztaly)
         {
             int index = 0;
+            int yndex = 0;
             string[] napokHu = new[] { "Hétfő", "Kedd", "Szerda", "Csütörtök", "Péntek" }; 
             string[] napokEng = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" };
             List<Timetable> orak = new List<Timetable>();
             List<Action> orakAction = new List<Action>();
+            Action[,] orakActionMatrix = new Action[5, 8];
             Timetable[,] orakMatrix = new Timetable[5, 8];
             foreach (var item in Timetable.timetable)
             {
@@ -86,6 +87,7 @@ namespace Kreta1._0
                     if (napIndex >= 0 && oraIndex >= 0 && oraIndex < 8)
                     {
                         orakMatrix[napIndex, oraIndex] = item;
+                        orakActionMatrix[napIndex, oraIndex] = Tanar.;
                         orak.Add(item);
                     }
                 }
@@ -110,7 +112,7 @@ namespace Kreta1._0
                     for (int j = 0; j < orakMatrix.GetLength(0); j++)
                     {
                         if (index == i)
-                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.ForegroundColor = ConsoleColor.Blue;
                         else
                             Console.ForegroundColor = ConsoleColor.White;
                         Console.Write($"{orakMatrix[j, i].Subject}, {orakMatrix[j, i].Teacher}:{orakMatrix[j, i].Terem, -20}");
@@ -145,13 +147,21 @@ namespace Kreta1._0
                             index++;
                         } while (orak[index] == null);
                         break;
-
+                        
                     case ConsoleKey.Enter:
                         if (orak[index] != null)
                         {
-                            orakAction[index].Invoke();
+                            orakActionMatrix[index, yndex].Invoke();
                             beker = false;
                         }
+                        break;
+                    case ConsoleKey.RightArrow:
+                        yndex++;
+                        if (yndex >= napokHu.Length) yndex = 0;
+                        break;
+                    case ConsoleKey.LeftArrow:
+                        yndex--;
+                        if (yndex < 0) yndex = napokHu.Length - 1;
                         break;
                     default:
                         continue;
