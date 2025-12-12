@@ -86,15 +86,12 @@ namespace Kreta1._0
                 if (item.Osztaly != osztaly) continue;
 
                 int napIndex = Array.IndexOf(napokEng, item.DayOfWeek);
-                int oraIndex = item.HourOfDay - 1; // HourOfDay is 1-based in the model
+                int oraIndex = item.HourOfDay - 1;
 
                 if (napIndex >= 0 && napIndex < days && oraIndex >= 0 && oraIndex < hours)
                 {
-                    // store timetable entry
                     orakMatrix[napIndex, oraIndex] = item;
 
-                    // create a simple action that shows details for this cell
-                    // capture the item in a local variable to avoid closure issues
                     var captured = item;
                     orakActionMatrix[napIndex, oraIndex] = () =>
                     {
@@ -112,7 +109,6 @@ namespace Kreta1._0
                 }
             }
 
-            // Helper: find first occupied cell (returns true if found)
             bool FindFirstOccupied(out int day, out int hour)
             {
                 for (int h = 0; h < hours; h++)
@@ -132,7 +128,6 @@ namespace Kreta1._0
                 return false;
             }
 
-            // Helper: move to next occupied cell given delta (wraps) — does not change selection if none found
             void MoveToNextOccupied(ref int curDay, ref int curHour, int deltaDay, int deltaHour)
             {
                 int total = days * hours;
@@ -149,13 +144,11 @@ namespace Kreta1._0
                         return;
                     }
                 }
-                // leave curDay/curHour unchanged if no occupied cell exists
             }
 
-            int selectedDay = 0;   // 0..4
-            int selectedHour = 0;  // 0..7
+            int selectedDay = 0;  
+            int selectedHour = 0; 
 
-            // Start on first occupied cell if any
             if (FindFirstOccupied(out var fd, out var fh))
             {
                 selectedDay = fd;
@@ -167,7 +160,6 @@ namespace Kreta1._0
             {
                 Console.Clear();
 
-                // Header: day names
                 for (int d = 0; d < days; d++)
                 {
                     Console.Write($"{napokHu[d],-25}");
@@ -175,7 +167,6 @@ namespace Kreta1._0
                 Console.WriteLine();
                 Console.WriteLine(new string('-', 25 * days));
 
-                // Rows: hours
                 for (int h = 0; h < hours; h++)
                 {
                     for (int d = 0; d < days; d++)
@@ -192,11 +183,9 @@ namespace Kreta1._0
                         }
                         else
                         {
-                            // Build compact text: Subject, Teacher, Room
                             cellText = $"{cell.Subject}, {cell.Teacher}, R{cell.Terem}";
                         }
 
-                        // Ensure fixed column width
                         if (cellText.Length > 24) cellText = cellText.Substring(0, 24);
                         Console.Write($"{cellText,-25}");
 
@@ -205,9 +194,8 @@ namespace Kreta1._0
                     Console.WriteLine();
                 }
 
-                // Controls hint
                 Console.WriteLine();
-                Console.WriteLine("Navigáció: ← → ↑ ↓    Enter = részletek    Esc = vissza");
+                Console.WriteLine("Enter = részletek");
 
                 var key = Console.ReadKey(true).Key;
                 switch (key)
@@ -232,7 +220,6 @@ namespace Kreta1._0
                         }
                         else
                         {
-                            // no action for empty cell — show a brief message
                             Console.Clear();
                             Console.WriteLine("Ez az időpont üres.\nNyomj meg egy gombot a visszatéréshez...");
                             Console.ReadKey(true);
