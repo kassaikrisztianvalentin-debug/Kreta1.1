@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Kreta1._0
 {
-    internal class Timetable
+    public class Timetable
     {
         public string Osztaly { get; set; }
         public string DayOfWeek { get; set; }
