@@ -34,6 +34,7 @@ namespace Kreta1._0
             Save.mentes(Authorization.tanuloList);
             Save.mentes(Authorization.tanarList);
             Save.mentes(Authorization.adminList);
+            Save.mentes(Authorization.userList);
             Save.mentes(Tanulo.jegyek);
             Save.mentes(Tanulo.Intok);
         }
