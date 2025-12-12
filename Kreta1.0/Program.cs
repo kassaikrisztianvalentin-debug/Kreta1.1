@@ -11,8 +11,8 @@ namespace Kreta1._0
     {
         static void Main(string[] args)
         {
-            Authorization.fileRead("diakok.txt");
             Authorization.fileRead("tanarok.txt");
+            Authorization.fileRead("diakok.txt");
             Authorization.fileRead("adminok.txt");
             Save.betolt("intok.txt");
             Save.betolt("jegyek.txt");
