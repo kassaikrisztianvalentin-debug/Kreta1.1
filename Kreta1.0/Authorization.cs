@@ -21,41 +21,60 @@ namespace Kreta1._0
         public static List<Admin> adminList = new List<Admin>();
         public static void fileRead(string Filepath)
         {
+            if (!File.Exists(Filepath)) return;
+
             string[] temp = File.ReadAllLines(Filepath);
 
             foreach (var item in temp)
             {
+                if (string.IsNullOrWhiteSpace(item)) continue;
                 string[] d = item.Split(';');
-                string role = d[3];
-                if (role == "Tanulo")
-                {
-                    string name = d[0];
-                    string osztaly = d[1];
-                    string password = d[2];
-                    string username = d[4];
-                    osztalyok.Add(osztaly);
-                    tanuloList.Add(new Tanulo(username, password, name, osztaly));
-                    userList.Add(new Tanulo(username, password, name, osztaly));
-                }
-                else if (role == "Tanar")
-                {
-                    string name = d[1];
-                    string username = d[1].Trim().ToLower();
-                    string password = d[0];
-                    string tantargy = d[2];
+                if (d.Length < 4) continue;
 
-                    tantagyak.Add(tantargy);
-                    tanarList.Add(new Tanar(username, password, name, tantargy));
-                    userList.Add(new Tanar(username, password, name, tantargy));
-                }
-                else if (role == "Admin")
+                string role = d[3].Trim();
+                switch (role.ToLowerInvariant())
                 {
-                    string name = d[1];
-                    string username = d[1].Trim().ToLower();
-                    string password = d[0];
+                    case "tanulo":
+                    case "tanuló":
+                        {
+                            string name = d[0];
+                            string osztaly = d[1];
+                            string password = d[2];
+                            string username = d.Length > 4 ? d[4] : name.Trim().ToLower();
+                            osztalyok.Add(osztaly);
+                            var t = new Tanulo(username, password, name, osztaly);
+                            tanuloList.Add(t);
+                            userList.Add(t);
+                        }
+                        break;
 
-                    adminList.Add(new Admin(username, password, name));
-                    userList.Add(new Admin(username, password, name));
+                    case "tanar":
+                    case "tanár":
+                        {
+                            string name = d[1];
+                            string username = d[1].Trim().ToLower();
+                            string password = d[0];
+                            string tantargy = d.Length > 2 ? d[2] : "";
+                            tantagyak.Add(tantargy);
+                            var t = new Tanar(username, password, name, tantargy);
+                            tanarList.Add(t);
+                            userList.Add(t);
+                        }
+                        break;
+
+                    case "admin":
+                        {
+                            string name = d[1];
+                            string username = d[1].Trim().ToLower();
+                            string password = d[0];
+                            var a = new Admin(username, password, name);
+                            adminList.Add(a);
+                            userList.Add(a);
+                        }
+                        break;
+
+                    default:
+                        continue;
                 }
             }
         }
@@ -77,7 +96,7 @@ namespace Kreta1._0
                     return item;
                 }
             }
-            
+
             Console.WriteLine("Sikertelen bejelentkezés!");
             Thread.Sleep(1000);
             return null;

@@ -1,11 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Globalization;
 
 namespace Kreta1._0
 {
     internal class Menu
     {
+        // simple in-memory records for timetable events (keeps changes local; add persistence later if needed)
+        private class TimetableRecord
+        {
+            public string Osztaly { get; set; }
+            public string DayOfWeek { get; set; }
+            public int Hour { get; set; }
+            public string Type { get; set; } // "Mulasztas" or "Elmaradas"
+            public string Student { get; set; }
+            public string Note { get; set; }
+            public DateTime RecordedAt { get; set; }
+        }
+
+        private static readonly List<TimetableRecord> timetableRecords = new List<TimetableRecord>();
+
         public static void menu(User current, List<string> menutext, List<Action> parancs, int hossz)
         {
             int index = 0;
@@ -95,16 +112,7 @@ namespace Kreta1._0
                     var captured = item;
                     orakActionMatrix[napIndex, oraIndex] = () =>
                     {
-                        Console.Clear();
-                        Console.WriteLine("Óra részletei:\n");
-                        Console.WriteLine($"Osztály : {captured.Osztaly}");
-                        Console.WriteLine($"Nap     : {captured.DayOfWeek}");
-                        Console.WriteLine($"Óra     : {captured.HourOfDay}");
-                        Console.WriteLine($"Tantárgy: {captured.Subject}");
-                        Console.WriteLine($"Taná r  : {captured.Teacher}");
-                        Console.WriteLine($"Terem   : {captured.Terem}");
-                        Console.WriteLine("\nNyomj meg egy gombot a visszatéréshez...");
-                        Console.ReadKey(true);
+                        ShowTimetableSlotOptions(captured);
                     };
                 }
             }
@@ -146,8 +154,8 @@ namespace Kreta1._0
                 }
             }
 
-            int selectedDay = 0;  
-            int selectedHour = 0; 
+            int selectedDay = 0;
+            int selectedHour = 0;
 
             if (FindFirstOccupied(out var fd, out var fh))
             {
@@ -183,7 +191,14 @@ namespace Kreta1._0
                         }
                         else
                         {
-                            cellText = $"{cell.Subject}, {cell.Teacher}, R{cell.Terem}";
+                            // show markers if there are records for this slot
+                            int mCount = timetableRecords.FindAll(r => r.Osztaly == cell.Osztaly && r.DayOfWeek == cell.DayOfWeek && r.Hour == cell.HourOfDay && r.Type == "Mulasztas").Count;
+                            int eCount = timetableRecords.FindAll(r => r.Osztaly == cell.Osztaly && r.DayOfWeek == cell.DayOfWeek && r.Hour == cell.HourOfDay && r.Type == "Elmaradas").Count;
+                            string markers = "";
+                            if (mCount > 0) markers += $" M:{mCount}";
+                            if (eCount > 0) markers += $" E:{eCount}";
+
+                            cellText = $"{cell.Subject}, {cell.Teacher}, R{cell.Terem}{markers}";
                         }
 
                         if (cellText.Length > 24) cellText = cellText.Substring(0, 24);
@@ -195,7 +210,7 @@ namespace Kreta1._0
                 }
 
                 Console.WriteLine();
-                Console.WriteLine("Enter = részletek");
+                Console.WriteLine("Enter = részletek   ESC = vissza");
 
                 var key = Console.ReadKey(true).Key;
                 switch (key)
@@ -232,6 +247,150 @@ namespace Kreta1._0
                         break;
                 }
             }
+        }
+
+        private static void ShowTimetableSlotOptions(Timetable slot)
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("Óra részletei:\n");
+                Console.WriteLine($"Osztály : {slot.Osztaly}");
+                Console.WriteLine($"Nap     : {slot.DayOfWeek}");
+                Console.WriteLine($"Óra     : {slot.HourOfDay}");
+                Console.WriteLine($"Tantárgy: {slot.Subject}");
+                Console.WriteLine($"Taná r  : {slot.Teacher}");
+                Console.WriteLine($"Terem   : {slot.Terem}");
+                Console.WriteLine();
+
+                // show existing records for this slot
+                var records = timetableRecords.FindAll(r => r.Osztaly == slot.Osztaly && r.DayOfWeek == slot.DayOfWeek && r.Hour == slot.HourOfDay);
+                if (records.Count == 0)
+                {
+                    Console.WriteLine("Nincs rögzített mulasztás/elmaradás erre az órára.");
+                }
+                else
+                {
+                    Console.WriteLine("Rögzített bejegyzések:");
+                    int i = 1;
+                    foreach (var rec in records)
+                    {
+                        Console.WriteLine($"{i++}. [{rec.Type}] {rec.Student} - {rec.Note} ({rec.RecordedAt:g})");
+                    }
+                }
+
+                Console.WriteLine("\n1) Mulasztás beírása");
+                Console.WriteLine("2) Elmaradás beírása");
+                Console.WriteLine("3) Vissza");
+
+                var key = Console.ReadKey(true).Key;
+                if (key == ConsoleKey.D1 || key == ConsoleKey.NumPad1)
+                {
+                    AddTimetableRecord(slot, "Mulasztas");
+                }
+                else if (key == ConsoleKey.D2 || key == ConsoleKey.NumPad2)
+                {
+                    AddTimetableRecord(slot, "Elmaradas");
+                }
+                else if (key == ConsoleKey.D3 || key == ConsoleKey.NumPad3 || key == ConsoleKey.Escape)
+                {
+                    return;
+                }
+            }
+        }
+
+        private static void AddTimetableRecord(Timetable slot, string type)
+        {
+            Console.Clear();
+            Console.WriteLine($"{(type == "Mulasztas" ? "Mulasztás" : "Elmaradás")} beírása");
+
+            // validate student name exists in Authorization.tanuloList (ask until valid or cancel)
+            string studentInput;
+            while (true)
+            {
+                Console.Write("Tanuló neve (pontosan vagy felhasználónév, üres = vissza): ");
+                studentInput = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(studentInput))
+                {
+                    Console.WriteLine("Mégse. Visszatérés...");
+                    return;
+                }
+
+                string normInput = NormalizeName(studentInput);
+
+                // match by normalized display name OR normalized username
+                var match = Authorization.tanuloList.FirstOrDefault(t =>
+                    string.Equals(NormalizeName(t.Name), normInput, StringComparison.Ordinal) ||
+                    string.Equals(NormalizeName(t.Username), normInput, StringComparison.Ordinal));
+
+                if (match != null)
+                {
+                    // use exact stored name for consistency
+                    studentInput = match.Name;
+                    break;
+                }
+
+                Console.WriteLine("Nincs ilyen tanuló. Kérlek próbáld újra (vagy üresen lépj vissza).");
+            }
+
+            Console.Write("Megjegyzés (opcionális): ");
+            string note = Console.ReadLine();
+
+            var rec = new TimetableRecord
+            {
+                Osztaly = slot.Osztaly,
+                DayOfWeek = slot.DayOfWeek,
+                Hour = slot.HourOfDay,
+                Type = type,
+                Student = studentInput,
+                Note = note ?? "",
+                RecordedAt = DateTime.Now
+            };
+
+            timetableRecords.Add(rec);
+
+            // Also add an Into entry so the student sees the absence in their beírások list
+            try
+            {
+                // Fokozat reuses the type text (Hungarian)
+                string fokozat = type == "Mulasztas" ? "Mulasztás" : "Elmaradás";
+                string szoveg = string.IsNullOrWhiteSpace(note) ? fokozat : note;
+
+                // Use the teacher name from the timetable slot as TanarNeve
+                Tanulo.Intok.Add(new Into(slot.Teacher, studentInput, DateTime.Now, szoveg, fokozat));
+
+                // Persist the intok immediately so it is available after restart and for other views
+                Save.mentes(Tanulo.Intok);
+            }
+            catch
+            {
+                // non-fatal: if Into constructor or list isn't available, we already keep timetableRecords
+            }
+
+            Console.WriteLine("\nSikeres rögzítés!");
+            Console.WriteLine("Nyomj meg egy gombot a visszatéréshez...");
+            Console.ReadKey(true);
+        }
+
+        // Normalize names: trim, lowercase, remove diacritics and collapse spaces
+        private static string NormalizeName(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return string.Empty;
+            var trimmed = s.Trim().ToLowerInvariant();
+
+            // remove diacritics
+            var normalized = trimmed.Normalize(System.Text.NormalizationForm.FormKD);
+            var sb = new StringBuilder();
+            foreach (var ch in normalized)
+            {
+                var uc = CharUnicodeInfo.GetUnicodeCategory(ch);
+                if (uc != UnicodeCategory.NonSpacingMark)
+                    sb.Append(ch);
+            }
+
+            // collapse multiple spaces
+            var collapsed = System.Text.RegularExpressions.Regex.Replace(sb.ToString(), @"\s+", " ").Trim();
+            return collapsed;
         }
     }
 }

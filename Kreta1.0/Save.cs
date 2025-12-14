@@ -11,23 +11,6 @@ namespace Kreta1._0
     {
         public static void mentes<T>(List<T> lista)
         {
-            //string fileName = typeof(T) == typeof(Jegy) ? "jegyek.txt" : "intok.txt";
-            //bool fileType = typeof(T) == typeof(Jegy);
-            //using (StreamWriter sw = new StreamWriter(fileName))
-            //{
-            //    foreach (var item in lista)
-            //    {
-            //        if (item is Jegy jegy)
-            //        {
-            //            sw.WriteLine($"{jegy.Tantargy};{jegy.Ertek};{jegy.Datum};{jegy.TanarNeve};{jegy.TanuloNeve}");
-            //        }
-            //        else if (item is Into into)
-            //        {
-            //            sw.WriteLine($"{into.TanarNeve};{into.TanuloNeve};{into.Datum};{into.Szoveg};{into.Fokozat}");
-            //        }
-            //    }
-            //}
-
             string fileName = "";
             if (typeof(T) == typeof(Jegy))
             {
@@ -50,7 +33,13 @@ namespace Kreta1._0
                 fileName = "adminok.txt";
             }
 
-            using (StreamWriter sw = new StreamWriter(fileName))
+            // Guard: unknown type -> skip (prevent StreamWriter with empty filename)
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+
+            using (StreamWriter sw = new StreamWriter(fileName, false))
             {
                 foreach (var item in lista)
                 {
