@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Globalization;
+using System.Threading;
+using System.Security;
 
 namespace Kreta1._0
 {
@@ -22,6 +24,42 @@ namespace Kreta1._0
         }
 
         private static readonly List<TimetableRecord> timetableRecords = new List<TimetableRecord>();
+        public static void LoadingScreen()
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            string ascii =
+@" ____  __.               __           
+|    |/ _|______   _____/  |______    
+|      < \_  __ \_/ __ \   __\__  \   
+|    |  \ |  | \/\  ___/|  |  / __ \_ 
+|____|__ \|__|    \___  >__| (____  / 
+        \/            \/          \/  ";
+
+            string[] lines = ascii.Split('\n');
+
+
+            int consoleWidth = Console.WindowWidth;
+            int consoleHeight = Console.WindowHeight;
+
+
+            int topPadding = (consoleHeight / 2) - (lines.Length / 2);
+
+
+            for (int i = 0; i < topPadding; i++)
+            {
+                Console.WriteLine();
+            }
+
+
+            foreach (string line in lines)
+            {
+                int leftPadding = (consoleWidth / 2) - (line.Length / 2);
+                Console.WriteLine(new string(' ', Math.Max(0, leftPadding)) + line);
+            }
+            Thread.Sleep(2000);
+        }
 
         public static void menu(User current, List<string> menutext, List<Action> parancs, int hossz)
         {
@@ -29,8 +67,20 @@ namespace Kreta1._0
             List<string> menuT = menutext;
             List<Action> menuP = parancs;
 
+
             void menukiiras()
             {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                string ascii =
+@" ____  __.               __           
+|    |/ _|______   _____/  |______    
+|      < \_  __ \_/ __ \   __\__  \   
+|    |  \ |  | \/\  ___/|  |  / __ \_ 
+|____|__ \|__|    \___  >__| (____  / 
+        \/            \/          \/  ";
+                Console.WriteLine(ascii);
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.SetCursorPosition(10, 10);
                 Console.WriteLine($"\tÜdv {current.Name}!\n");
                 for (int i = 0; i < menuT.Count; i++)
                 {

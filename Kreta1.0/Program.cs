@@ -11,6 +11,7 @@ namespace Kreta1._0
     {
         static void Main(string[] args)
         {
+            Menu.LoadingScreen();
             Authorization.fileRead("tanarok.txt");
             Authorization.fileRead("diakok.txt");
             Authorization.fileRead("adminok.txt");

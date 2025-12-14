@@ -42,7 +42,7 @@ namespace Kreta1._0
     {
         public static List<Jegy> jegyek = new List<Jegy>();
         public static List<Into> Intok = new List<Into>();
-        public static List<string> tanulomenupontok = new List<string>() { "Jegyek ", "Beírások", "Mulasztások", "Átlag ", "Kijelentkezés", "Kilépés" };
+        public static List<string> tanulomenupontok = new List<string>() { "Jegyek ", "Beírások", "Mulasztások", "Kijelentkezés", "Kilépés" };
         public List<Action> parancs = new List<Action>();
         public string Osztaly { get; set; }
 
@@ -52,7 +52,6 @@ namespace Kreta1._0
             parancs.Add(() => Értékelések());
             parancs.Add(() => beirasok());
             parancs.Add(() => mulasztasok());
-            parancs.Add(() => atlag());
             parancs.Add(() => Program.bejelentkezes());
             parancs.Add(() =>
             {
@@ -125,10 +124,6 @@ namespace Kreta1._0
             {
                 Értékelések();
             }
-        }
-        public double atlag()
-        {
-            return 1.0;
         }
         void beirasok()
         {
@@ -206,7 +201,7 @@ namespace Kreta1._0
             : base(username, password, "Tanár", name)
         {
             parancs.Add(() => osztalyok());
-            parancs.Add(() => this.ToString());
+            parancs.Add(() => Adataim());
             parancs.Add(() => Program.bejelentkezes());
             parancs.Add(() =>
             {
@@ -215,7 +210,18 @@ namespace Kreta1._0
             });
             this.tantargy = tantargy;
         }
+        void Adataim()
+        {
+            Console.Clear();
+            Console.WriteLine($"Név: {this.Name}");
+            Console.WriteLine($"Felhasználónév: {this.Username}");
+            Console.WriteLine($"Jelszó: {this.Password}");
+            Console.WriteLine($"Tantárgy: {this.tantargy}");
 
+            Console.WriteLine("\nNyomd le bármely betűt a kilépéshez...");
+            var k = Console.ReadKey(true);
+            Menu.menu(this, tanarmenupontok, parancs, tanarmenupontok.Count);
+        }
         void osztalyok()
         {
             List<string> osztalykiiras = new List<string>();
@@ -253,11 +259,9 @@ namespace Kreta1._0
         }
         void tanuloFunkciok(Tanulo tanulo)
         {
-            // allow entering grades only if the logged-in teacher actually teaches the class
-            bool canEnter = Timetable.timetable.Any(t => t.Osztaly == tanulo.Osztaly && t.Teacher == this.Name);
 
-            List<string> tanulofunkciokkiiras = new List<string>() { canEnter ? "Jegybeírás" : "Jegyek megtekintése", "Intő", "Mulasztás", "Jegyek", "Vissza" };
-            List<Action> tanulofunkciokparancs = new List<Action>() { canEnter ? (Action)(() => jegybeiras(tanulo)) : (Action)(() => tanuloJegyek(tanulo)), () => Into(tanulo), () => mulasztas(), () => tanuloJegyek(tanulo), () => osztalyok()};
+            List<string> tanulofunkciokkiiras = new List<string>() {"Jegybeírás", "Jegyek megtekintése", "Intő", "Mulasztás", "Vissza" };
+            List<Action> tanulofunkciokparancs = new List<Action>() {() => jegybeiras(tanulo), (Action)(() => tanuloJegyek(tanulo)), () => Into(tanulo), () => mulasztas(), () => osztalyok()};
             Menu.menu(this, tanulofunkciokkiiras, tanulofunkciokparancs, tanulofunkciokparancs.Count);
         }
         void tanuloJegyek(Tanulo tanulo)
@@ -281,23 +285,24 @@ namespace Kreta1._0
         #region jegy
         void jegybeiras(Tanulo tanulo)
         {
-            // defensive permission check — only allow if this teacher appears in the timetable for that class
-            bool canEnter = Timetable.timetable.Any(t => t.Osztaly == tanulo.Osztaly && t.Teacher == this.Name);
-            if (!canEnter)
-            {
-                Console.Clear();
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Nincs jogosultság jegybeírásra ennél a tanulónál. Csak a saját órámon tudok jegyet beírni.");
-                Console.ForegroundColor = ConsoleColor.White;
-                Thread.Sleep(1200);
-                tanuloFunkciok(tanulo);
-                return;
-            }
-
             Console.Write("Kérem a jegyet (1-5): ");
             int jegy = int.Parse(Console.ReadLine());
-            Tanulo.jegyek.Add(new Jegy(this.tantargy, jegy, DateTime.Now, this.Name, tanulo.Name));
-            Console.WriteLine("Sikeres jegybeírás!");
+
+            while (true)
+            {
+                if (jegy >= 1 && jegy <= 5)
+                {
+                    Tanulo.jegyek.Add(new Jegy(this.tantargy, jegy, DateTime.Now, this.Name, tanulo.Name));
+                    Console.WriteLine("Sikeres jegybeírás!");
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Sikertelen jegybeiras\n");
+                    Console.Write("Kérem a jegyet (1-5): ");
+                    jegy = int.Parse(Console.ReadLine());
+                }
+            }
             Thread.Sleep(1000);
             tanuloFunkciok(tanulo);
         }
@@ -312,8 +317,21 @@ namespace Kreta1._0
         {
             Console.Write("Kérem az új jegyet (1-5): ");
             int ujJegy = int.Parse(Console.ReadLine());
-            jegy.Ertek = ujJegy;
-            Console.WriteLine("Sikeres jegymódosítás!");
+            while (true)
+            {
+                if (ujJegy >= 1 && ujJegy <= 5)
+                {
+                    jegy.Ertek = ujJegy;
+                    Console.WriteLine("Sikeres jegymódosítás!");
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Sikertelen jegymódosítás!\n");
+                    Console.Write("Kérem a jegyet (1-5): ");
+                    ujJegy = int.Parse(Console.ReadLine());
+                }
+            }
             Thread.Sleep(1000);
             osztalyok();
         }
@@ -415,11 +433,6 @@ namespace Kreta1._0
         {
             
 
-        }
-        public override string ToString()
-        {
-            Console.Clear();
-            return $"Név: {Name}\nFelhasználónév: {Username}\nJelszó: {Password}Tantárgy: {tantargy}";
         }
     }
     public class Admin : User
